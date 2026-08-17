@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Çay Ocağı Veresiye</title>
+<style>
+body{font-family:Arial;margin:0;background:#f3f5f6;color:#222}header{background:#263238;color:white;padding:18px;font-size:22px;font-weight:bold}
+main{max-width:700px;margin:auto;padding:15px}.top{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+input,button{padding:11px;border-radius:9px;border:1px solid #ccc;font-size:16px}input{flex:1}button{background:#37474f;color:white;border:0}
+.card{background:white;padding:14px;border-radius:12px;margin:9px 0;box-shadow:0 2px 7px #0001;display:flex;justify-content:space-between;align-items:center}
+.name{font-weight:bold;font-size:18px}.debt{color:#c62828;font-weight:bold;margin-top:5px}
+.stats{background:white;padding:14px;border-radius:12px;margin-bottom:12px}.green{background:#2e7d32}.red{background:#c62828}
+</style></head>
+<body>
+<header>☕ Çay Ocağı Veresiye</header>
+<main>
+<div class="stats">Müşteri: <b id="say">0</b> &nbsp; | &nbsp; Toplam borç: <b id="top">0 TL</b></div>
+<div class="top"><input id="ara" placeholder="Müşteri ara..."><button class="green" onclick="ekle()">+ Müşteri</button></div>
+<div id="liste"></div>
+</main>
+<script>
+const K="veresiye";let d=JSON.parse(localStorage.getItem(K)||"[]");
+const save=()=>{localStorage.setItem(K,JSON.stringify(d));goster()};
+const tl=n=>n.toLocaleString("tr-TR",{minimumFractionDigits:2})+" TL";
+function ekle(){let n=prompt("Müşteri adı:");if(n&&n.trim()){d.push({n:n.trim(),b:0});save()}}
+function islem(i){let p=d[i],a=prompt(p.n+"\nMevcut borç: "+tl(p.b)+"\n\nTutar gir:");if(a===null)return;a=Number(a);if(!a||a<0)return alert("Geçerli tutar gir.");
+let sec=prompt("Borç eklemek için +, ödeme almak için - yaz.");if(sec==="+")p.b+=a;else if(sec==="-"){if(a>p.b)return alert("Borçtan fazla ödeme olamaz.");p.b-=a}else return;save()}
+function sil(i){if(confirm(d[i].n+" silinsin mi?")){d.splice(i,1);save()}}
+function goster(){let q=document.getElementById("ara").value.toLocaleLowerCase("tr-TR"),x=d.map((p,i)=>({p,i})).filter(x=>x.p.n.toLocaleLowerCase("tr-TR").includes(q));
+document.getElementById("say").textContent=d.length;document.getElementById("top").textContent=tl(d.reduce((s,p)=>s+p.b,0));
+document.getElementById("liste").innerHTML=x.length?x.map(x=>`<div class="card"><div><div class="name">${esc(x.p.n)}</div><div class="debt">${tl(x.p.b)}</div></div><div><button onclick="islem(${x.i})">İşlem</button> <button class="red" onclick="sil(${x.i})">Sil</button></div></div>`).join(""):"<div class='card'>Müşteri bulunamadı.</div>"}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+document.getElementById("ara").oninput=goster;goster();
+</script></body></html>
